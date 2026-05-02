@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 
 const app = express();
-const PORT = 5000;
+const PORT =  process.env.PORT || 5000;
 const SECRET = "mysecretkey";
 require("dotenv").config();
 // 🔹 Middleware
@@ -32,7 +32,9 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", userSchema);
 
-
+app.get("/", (req, res) => {
+  res.json({ message: "Backend running 🚀" });
+});
 // 🔹 Signup API
 app.post("/signup", async (req, res) => {
   try {
