@@ -7,7 +7,7 @@ export default function Signup() {
 
   const handleSignup = async () => {
     try {
-      await axios.post("http://localhost:5000/signup", {
+      await axios.post("https://dsa-visualizer-c84b.onrender.com/signup", {
         email,
         password
       });
