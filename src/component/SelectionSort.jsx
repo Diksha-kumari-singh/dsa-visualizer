@@ -49,7 +49,7 @@ export default function SelectionSort() {
     if (array.length === 0) return;
 
     const anims = SelectionSortAnimations(array);
-
+    setSortedIndices([]);
     setAnimations(anims);
     setCurrentStep(0);
     setIsSorting(true);
@@ -59,27 +59,36 @@ export default function SelectionSort() {
 
   // 🔹 Animation Runner
   useEffect(() => {
-    if (!isSorting || isPaused) return;
+  if (!isSorting || isPaused) return;
 
-    intervalRef.current = setInterval(() => {
-      setCurrentStep((prev) => prev + 1);
-    }, speed);
+  intervalRef.current = setInterval(() => {
+    setCurrentStep((prev) => {
+      if (prev >= animations.length - 1) {
+        clearInterval(intervalRef.current);
+        return prev;
+      }
+      return prev + 1;
+    });
+  }, speed);
 
-    return () => clearInterval(intervalRef.current);
-  }, [isSorting, isPaused, speed]);
-
+  return () => clearInterval(intervalRef.current);
+}, [isSorting, isPaused, speed, animations.length]);
   // 🔹 Apply Steps
   useEffect(() => {
     if (!isSorting) return;
 
     if (currentStep >= animations.length) {
-      clearInterval(intervalRef.current);
-      setIsSorting(false);
-      setActiveIndices([]);
-      setSortedIndices(array.map((_, i) => i));
-      setStatus("Array Sorted Successfully ✅");
-      return;
-    }
+  clearInterval(intervalRef.current);
+  setIsSorting(false);
+  setActiveIndices([]);
+  setSortedIndices(array.map((_, i) => i));
+  setStatus("Array Sorted Successfully ✅");
+
+  // 🔥 ensure final correct array
+  setArray((prev) => [...prev].sort((a, b) => a - b));
+
+  return;
+}
 
     const step = animations[currentStep];
 
@@ -109,7 +118,7 @@ export default function SelectionSort() {
 
       setStatus(`Index ${step.index} sorted`);
     }
-  }, [currentStep, animations, isSorting, array]);
+}, [currentStep, animations, isSorting]);
 
   // 🔹 Controls
   const pauseSorting = () => {

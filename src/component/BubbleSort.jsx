@@ -49,7 +49,7 @@ export default function BubbleSort() {
     if (array.length === 0) return;
 
     const anims = BubbleSortAnimations(array);
-
+    setSortedIndices([]); // add this
     setAnimations(anims);
     setCurrentStep(0);
     setIsSorting(true);
@@ -59,27 +59,36 @@ export default function BubbleSort() {
 
   // 🔹 Animation runner
   useEffect(() => {
-    if (!isSorting || isPaused) return;
+  if (!isSorting || isPaused) return;
 
-    intervalRef.current = setInterval(() => {
-      setCurrentStep((prev) => prev + 1);
-    }, speed);
+  intervalRef.current = setInterval(() => {
+    setCurrentStep((prev) => {
+      if (prev >= animations.length - 1) {
+        clearInterval(intervalRef.current);
+        return prev;
+      }
+      return prev + 1;
+    });
+  }, speed);
 
-    return () => clearInterval(intervalRef.current);
-  }, [isSorting, isPaused, speed]);
-
+  return () => clearInterval(intervalRef.current);
+}, [isSorting, isPaused, speed, animations.length]);
   // 🔹 Apply steps
   useEffect(() => {
     if (!isSorting) return;
 
     if (currentStep >= animations.length) {
-      clearInterval(intervalRef.current);
-      setIsSorting(false);
-      setActiveIndices([]);
-      setSortedIndices(array.map((_, i) => i));
-      setStatus("Array Sorted Successfully ✅");
-      return;
-    }
+  clearInterval(intervalRef.current);
+  setIsSorting(false);
+  setActiveIndices([]);
+  setSortedIndices(array.map((_, i) => i));
+  setStatus("Array Sorted Successfully ✅");
+
+  // 🔥 ensure final sorted array
+  setArray((prev) => [...prev].sort((a, b) => a - b));
+
+  return;
+}
 
     const step = animations[currentStep];
 
@@ -100,10 +109,12 @@ export default function BubbleSort() {
     }
 
     if (step.type === "sorted") {
-      setSortedIndices((prev) => [...prev, step.index]);
+      setSortedIndices((prev) =>
+  prev.includes(step.index) ? prev : [...prev, step.index]
+);
       setStatus(`Index ${step.index} sorted`);
     }
-  }, [currentStep, animations, isSorting, array]);
+  },  [currentStep, animations, isSorting]);
 
   // 🔹 Controls
   const pauseSorting = () => {
